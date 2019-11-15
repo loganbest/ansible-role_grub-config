@@ -1,0 +1,20 @@
+---
+# defaults file for grub
+
+# Default list of additional Grub command line arguments
+grub_cmdline_add_args:
+  - cgroup_enable=memory
+  - swapaccount=1
+  - audit=1
+
+# Default list of arguments to remove (for Grub 0.9x)
+grub_cmdline_remove_args: []
+
+# Path to the Grub 0.9x config file
+grub_cmdline_config_v1: /boot/grub/grub.conf
+
+# Path to the Grub2 config file
+grub_cmdline_config_v2: /boot/grub2/grub.cfg
+
+# Path to the Grub2 default file
+grub_cmdline_default: /etc/default/grub

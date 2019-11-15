@@ -1,0 +1,15 @@
+---
+# tasks file for grub
+
+
+- name: Update Grub default config for RedHat >= 7
+  lineinfile:
+    dest: "{{ grub_cmdline_default }}"
+    line: GRUB_CMDLINE_LINUX="{{ grub_cmdline_add_args | join(' ') }}"
+    regexp: '^GRUB_CMDLINE_LINUX="'
+		backup: true
+  when: >
+    ansible_os_family == "RedHat" and
+    ansible_distribution_major_version | int >= 7
+  notify:
+    - Update Grub2 config file redhat

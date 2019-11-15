@@ -1,0 +1,5 @@
+---
+# handlers file for grub
+
+- name: Update Grub2 config file redhat
+  shell: grub2-mkconfig -o {{ grub_cmdline_config_v2 }}
