@@ -16,5 +16,8 @@ grub_cmdline_config_v1: /boot/grub/grub.conf
 # Path to the Grub2 config file
 grub_cmdline_config_v2: /boot/grub2/grub.cfg
 
+# Path to the Grub2 original backup file
+grub_cmdline_original: /etc/default/grub.original
+
 # Path to the Grub2 default file
 grub_cmdline_default: /etc/default/grub

@@ -1,17 +1,42 @@
 ---
 # tasks file for grub
 
-- name: Grab existing grub contents
-  shell: cat {{ grub_cmdline_default }}
-  register: grub_raw
+- name: GRUB | Check if originals file already exists
+  stat:
+    path: "{{ grub_cmdline_original }}"
+  register: stat_grub_original
+  when: ansible_os_family == "RedHat"
 
-- name: Grab existing grub contents
+- name: GRUB | Fetch original grub defaults
+  fetch:
+    src: "{{ grub_cmdline_default }}"
+    dest: "/tmp/grub"
+    flat: yes
+  when: >
+    ansible_os_family == "RedHat" and
+    stat_grub_original.stat.exists == False
+
+- name: GRUB | Backup original grub defaults
+  copy:
+    src: "/tmp/grub"
+    dest: "{{ grub_cmdline_original }}"
+    force: no
+  when: >
+    ansible_os_family == "RedHat" and
+    stat_grub_original.stat.exists == False
+
+- name: GRUB | Grab existing grub contents
+  shell: cat {{ grub_cmdline_original }}
+  register: grub_original
+  when: ansible_os_family == "RedHat"
+
+- name: GRUB | Set grub_defaults fact with appended/removed args 
   set_fact: 
-    grub_defaults: "{{ grub_raw.stdout | regex_search(regexp, '\\1')}}"
+    grub_defaults: "{{ grub_original.stdout | regex_search(regexp, '\\1')}}"
   vars:
     regexp: 'GRUB_CMDLINE_LINUX=\"([^"]+)'
     
-- name: Update Grub default config for RedHat >= 7
+- name: GRUB | Update Grub default config for RedHat >= 7
   lineinfile:
     dest: "{{ grub_cmdline_default }}"
     line: GRUB_CMDLINE_LINUX="{{ grub_defaults[0] }} {{ grub_cmdline_add_args | join(' ') }}"
@@ -22,3 +47,10 @@
     ansible_distribution_major_version | int >= 7
   notify:
     - Update Grub2 config file redhat
+
+- name: GRUB | Enable serial-getty service
+  service:
+    name: "serial-getty@ttyS0.service"
+    enabled: yes
+  become: yes
+  when: ansible_os_family == "RedHat"
