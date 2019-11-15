@@ -1,11 +1,20 @@
 ---
 # tasks file for grub
 
+- name: Grab existing grub contents
+  shell: cat {{ grub_cmdline_default }}
+  register: grub_raw
 
+- name: Grab existing grub contents
+  set_fact: 
+    grub_defaults: "{{ grub_raw.stdout | regex_search(regexp, '\\1')}}"
+  vars:
+    regexp: 'GRUB_CMDLINE_LINUX=\"([^"]+)'
+    
 - name: Update Grub default config for RedHat >= 7
   lineinfile:
     dest: "{{ grub_cmdline_default }}"
-    line: GRUB_CMDLINE_LINUX="{{ grub_cmdline_add_args | join(' ') }}"
+    line: GRUB_CMDLINE_LINUX="{{ grub_defaults[0] }} {{ grub_cmdline_add_args | join(' ') }}"
     regexp: '^GRUB_CMDLINE_LINUX="'
     backup: true
   when: >
